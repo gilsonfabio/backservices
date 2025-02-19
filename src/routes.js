@@ -6,6 +6,7 @@ const UsersController = require('./controllers/UsersController');
 const ModalidadesController = require('./controllers/ModalidadesController');
 const TiposController = require('./controllers/TiposController');
 const ServicesController = require('./controllers/ServicesController');
+const SecretariasController = require('./controllers/SecretariasController');
 
 routes.get('/', (request, response) => {
     response.json({
@@ -45,8 +46,10 @@ routes.post('/signIn', UsersController.signIn);
 routes.get('/modalidades', ModalidadesController.index);
 
 routes.get('/tipos', TiposController.index);
+routes.get('/secretarias', SecretariasController.index);
 
 routes.post('/servicos', ServicesController.index);
 routes.post('/newservicos', ServicesController.create);
+routes.get('/searchServ/:idSrv', ServicesController.search);
 
 module.exports = routes;

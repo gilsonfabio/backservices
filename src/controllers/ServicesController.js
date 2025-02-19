@@ -10,6 +10,7 @@ module.exports = {
 
         const modalidade = request.body.modalidade;
         const tipo = request.body.tipo;
+        const secretaria = request.body.secretaria;
         const searchString = request.body.searchString;
 
         const page = request.body.page;
@@ -22,6 +23,7 @@ module.exports = {
         
         console.log('modalidades:',modalidade);
         console.log('tipos:',tipo);
+        console.log('secretarias:',secretaria);
         console.log('página atual:',page);
         console.log('limite p/ página:',per_page);
         console.log('total de registros:',countUser);
@@ -47,7 +49,7 @@ module.exports = {
             offset: offset
         }
 
-        if (!modalidade && !tipo && !searchString) {
+        if (!modalidade && !tipo && !secretaria && !searchString) {
             console.log('pesquisa:',1);
             const servicos = await connection('servicos')
             .join('secretarias', 'secId', 'servicos.srvSecId')
@@ -56,7 +58,7 @@ module.exports = {
             .select(['servicos.*', 'secretarias.secDescricao'])
             return response.json({pagination, servicos});
         } else {
-            if (modalidade && !tipo && !searchString) {
+            if (modalidade && !tipo && !secretaria && !searchString) {
                 console.log('pesquisa:',2);
                 const servicos = await connection('servicos')
                 .whereIn('srvMsvId', modalidade)
@@ -66,7 +68,7 @@ module.exports = {
                 .select(['servicos.*', 'secretarias.secDescricao'])
                 return response.json({pagination, servicos});
             } else {
-                if (!modalidade && tipo && !searchString) {
+                if (!modalidade && tipo && !secretaria && !searchString) {
                     console.log('pesquisa:',3);
                     const servicos = await connection('servicos')
                     .whereIn('srvTsvId', tipo)
@@ -76,7 +78,7 @@ module.exports = {
                     .select(['servicos.*', 'secretarias.secDescricao'])
                     return response.json({pagination, servicos});
                 } else {
-                    if (!modalidade && !tipo && searchString) {
+                    if (!modalidade && !tipo && !secretaria && searchString) {
                         console.log('pesquisa:',4);
                         const servicos = await connection('servicos')                        
                         .where('srvObjetivo', 'like', `%${searchString.replaceAll('%', '\\%')}%`)
@@ -86,7 +88,7 @@ module.exports = {
                         .select(['servicos.*', 'secretarias.secDescricao'])
                         return response.json({pagination, servicos});
                     } else {
-                        if (modalidade && !tipo && searchString) {
+                        if (modalidade && !tipo && !secretaria && searchString) {
                             console.log('pesquisa:',5);
                             const servicos = await connection('servicos')
                             .whereIn('srvMsvId', modalidade)
@@ -97,7 +99,7 @@ module.exports = {
                             .select(['servicos.*', 'secretarias.secDescricao'])
                             return response.json({pagination, servicos});
                         } else {
-                            if (modalidade && tipo && searchString) {
+                            if (modalidade && tipo && !secretaria && searchString) {
                                 console.log('pesquisa:',6);
                                 const servicos = await connection('servicos')                                
                                 .whereIn('srvMsvId', modalidade)
@@ -109,9 +111,10 @@ module.exports = {
                                 .select(['servicos.*', 'secretarias.secDescricao'])
                                 return response.json({pagination, servicos});
                             } else {
-                                if (!modalidade && !tipo && searchString) {
+                                if (!modalidade && !tipo && secretaria && searchString) {
                                     console.log('pesquisa:',7);
                                     const servicos = await connection('servicos')
+                                    .whereIn('srvSecId', secretaria)
                                     .where('srvObjetivo', 'like', `%${searchString.replaceAll('%', '\\%')}%`)
                                     .limit(per_page)
                                     .offset(offset)
@@ -119,10 +122,11 @@ module.exports = {
                                     .select(['servicos.*', 'secretarias.secDescricao'])
                                     return response.json({pagination, servicos});
                                 } else {
-                                    if (!modalidade && tipo && searchString) {
+                                    if (!modalidade && tipo && secretaria && searchString) {
                                         console.log('pesquisa:',8);
                                         const servicos = await connection('servicos')                                        
                                         .whereIn('srvTsvId', tipo)
+                                        .whereIn('srvSecId', secretaria)
                                         .where('srvObjetivo', 'like', `%${searchString.replaceAll('%', '\\%')}%`)
                                         .limit(per_page)
                                         .offset(offset)
@@ -130,9 +134,10 @@ module.exports = {
                                         .select(['servicos.*', 'secretarias.secDescricao'])
                                         return response.json({pagination, servicos});
                                     } else {
-                                        if (!modalidade && !tipo && !searchString) {
+                                        if (!modalidade && !tipo && secretaria && !searchString) {
                                             console.log('pesquisa:',9);
                                             const servicos = await connection('servicos')
+                                            .whereIn('srvSecId', secretaria)
                                             .limit(per_page)
                                             .offset(offset)
                                             .join('secretarias', 'secId', 'servicos.srvSecId')
@@ -167,6 +172,20 @@ module.exports = {
         });
            
         return response.json({srvId});
+    },
+
+    async search (request, response) {
+        let id = request.params.idSrv;
+
+        console.log('Serviço:',id)
+
+        const service = await connection('servicos')
+        .where('srvId', id)
+        .select('*');
+
+        console.log(service)
+    
+        return response.json(service);
     },
 
 };
